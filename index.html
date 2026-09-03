@@ -271,12 +271,11 @@
   .dv-fl { width: 130px; font-size: 11px; color: #888; flex-shrink: 0; padding-top: 2px; }
   .dv-fv { font-size: 13px; color: #1a1a2e; flex: 1; }
   .dv-fv.link { color: #3b5bdb; cursor: pointer; }
-  .dv-sig-locked-box { display: inline-flex; flex-direction: column; gap: 8px; }
-  .dv-sig-locked-badges { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-  .lock-badge { background: #e8f5e9; color: #2e7d32; font-size: 10px; padding: 3px 9px; border-radius: 3px; font-weight: 700; }
-  .sig-date-badge { font-size: 11px; color: #888; }
-  .dv-sig-image-wrap { background: white; border: 1px solid #e0e0e0; border-radius: 4px; padding: 8px 12px; }
-  .dv-sig-locked-note { font-size: 11px; color: #999; display: flex; align-items: flex-start; gap: 4px; max-width: 420px; line-height: 1.5; }
+  /* Locked signature field — hover lock icon style */
+  .dv-sig-field-wrap { position: relative; display: inline-flex; align-items: center; border: 1.5px solid #d8dce8; border-radius: 10px; background: #f5f6fa; padding: 10px 44px 10px 14px; min-width: 320px; cursor: default; }
+  .dv-sig-field-wrap:hover { border-color: #b0b8d0; }
+  .dv-sig-lock-icon { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #9aa3bc; font-size: 17px; opacity: 0; transition: opacity 0.15s; pointer-events: none; }
+  .dv-sig-field-wrap:hover .dv-sig-lock-icon { opacity: 1; }
 
   /* TOAST */
   .toast { position: fixed; bottom: 60px; left: 50%; transform: translateX(-50%); background: #1a1a2e; color: white; padding: 10px 20px; border-radius: 8px; font-size: 13px; display: none; z-index: 9999; white-space: nowrap; }
@@ -763,17 +762,9 @@
             <div class="dv-field-full">
               <div class="dv-fl" style="padding-top:4px;" id="dvSigLabel">Customer Signature</div>
               <div>
-                <div class="dv-sig-locked-box">
-                  <div class="dv-sig-locked-badges">
-                    <div class="lock-badge">🔒 Signed &amp; Locked</div>
-                    <div class="sig-date-badge" id="dvSigDate">Sep 3, 2026 · 10:24 AM</div>
-                  </div>
-                  <div class="dv-sig-image-wrap">
-                    <canvas id="dvSigCanvas" width="360" height="80"></canvas>
-                  </div>
-                  <div class="dv-sig-locked-note">
-                    🔒 This field is permanently locked after signing. It cannot be edited in Detail View or Edit View. Contact your administrator to request changes.
-                  </div>
+                <div class="dv-sig-field-wrap">
+                  <canvas id="dvSigCanvas" width="300" height="70"></canvas>
+                  <div class="dv-sig-lock-icon">🔒</div>
                 </div>
               </div>
             </div>
