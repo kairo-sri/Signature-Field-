@@ -959,8 +959,7 @@
     renderMsChips();
   }
 
-  function removeMsChip(e, fieldName) {
-    e.stopPropagation();
+  function removeMsChip(fieldName) {
     savedPreviewFields = savedPreviewFields.filter(function(f){ return f !== fieldName; });
     var cb = document.getElementById('mscb-' + fieldName);
     if (cb) { cb.classList.remove('checked'); cb.textContent = ''; cb.parentElement.classList.remove('selected'); }
@@ -971,7 +970,6 @@
     var inp = document.getElementById('msInput');
     var placeholder = document.getElementById('msPlaceholder');
     var arrow = document.getElementById('msArrow');
-    // Remove existing chips
     inp.querySelectorAll('.ms-chip').forEach(function(c){ c.remove(); });
     if (savedPreviewFields.length === 0) {
       placeholder.style.display = '';
@@ -980,7 +978,17 @@
       savedPreviewFields.forEach(function(fieldName) {
         var chip = document.createElement('div');
         chip.className = 'ms-chip';
-        chip.innerHTML = fieldName + '<span class="ms-chip-x" onclick="removeMsChip(event,'' + fieldName + '')">✕</span>';
+        var label = document.createTextNode(fieldName + ' ');
+        var x = document.createElement('span');
+        x.className = 'ms-chip-x';
+        x.textContent = '✕';
+        x.setAttribute('data-field', fieldName);
+        x.addEventListener('click', function(e) {
+          e.stopPropagation();
+          removeMsChip(this.getAttribute('data-field'));
+        });
+        chip.appendChild(label);
+        chip.appendChild(x);
         inp.insertBefore(chip, arrow);
       });
     }
