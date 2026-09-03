@@ -837,8 +837,8 @@
       <div class="sig-canvas-close" onclick="closeSigCanvas()">✕</div>
     </div>
     <div class="sig-consent-box" id="sigConsentBox">
-      <div class="sig-consent-ttl" id="canvasConsentTitle">Customer Consent Agreement</div>
-      <div class="sig-consent-body" id="canvasConsentBody">By signing below, I confirm that I have read, understood, and agree to the terms and conditions. I authorize the use of my electronic signature as a valid representation of my consent.</div>
+      <div class="sig-consent-ttl" id="canvasConsentTitle">Physiotherapy Treatment Consent</div>
+      <div class="sig-consent-body" id="canvasConsentBody">I consent to physiotherapy treatment for my bone and musculoskeletal condition. I understand that treatment may involve physical contact including manual therapy, joint mobilisation, and exercise. I acknowledge that physiotherapy carries some risk including temporary pain or discomfort, and that the therapist has explained the proposed treatment, its benefits, and alternatives. I confirm that I have disclosed all relevant medical history and agree to inform my therapist of any changes in my condition.</div>
     </div>
     <div class="sig-draw-area">
       <div class="sig-draw-lbl">✏️ &nbsp; Draw your signature in the box below</div>
@@ -980,8 +980,8 @@
       document.getElementById('canvasConsentTitle').textContent = savedConsentTitle || 'Consent Agreement';
       document.getElementById('canvasConsentBody').textContent = savedConsentBody;
     } else {
-      document.getElementById('canvasConsentTitle').textContent = 'Customer Consent Agreement';
-      document.getElementById('canvasConsentBody').textContent = 'By signing below, I confirm that I have read, understood, and agree to the terms and conditions. I authorize the use of my electronic signature as a valid representation of my consent.';
+      document.getElementById('canvasConsentTitle').textContent = 'Physiotherapy Treatment Consent';
+      document.getElementById('canvasConsentBody').textContent = 'I consent to physiotherapy treatment for my bone and musculoskeletal condition. I understand that treatment may involve physical contact including manual therapy, joint mobilisation, and exercise. I acknowledge that physiotherapy carries some risk including temporary pain or discomfort, and that the therapist has explained the proposed treatment, its benefits, and alternatives. I confirm that I have disclosed all relevant medical history and agree to inform my therapist of any changes in my condition.';
     }
     document.getElementById('sigCanvasOverlay').classList.add('visible');
     initDrawCanvas();
