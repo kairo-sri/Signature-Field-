@@ -232,6 +232,19 @@
   .cf-sig-click-text { font-size: 13px; color: #3b5bdb; font-weight: 500; }
   .cf-sig-click-sub { font-size: 11px; color: #888; margin-top: 2px; }
 
+  /* FIELD PICKER in Field Properties Modal */
+  .fp-list { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; margin-top: 6px; }
+  .fp-item { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 4px; cursor: pointer; font-size: 13px; color: #1a1a2e; }
+  .fp-item:hover { background: #f0f4ff; }
+
+  /* FIELD PREVIEW in Signing Canvas Popup */
+  .sig-fields-preview { padding: 14px 20px; border-bottom: 1px solid #e0e5ff; background: #fff; }
+  .sig-fields-preview-title { font-size: 10px; font-weight: 700; color: #3b5bdb; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 10px; }
+  .sig-fields-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 20px; }
+  .sig-field-preview-item { display: flex; flex-direction: column; gap: 1px; }
+  .sig-field-preview-lbl { font-size: 10px; color: #888; text-transform: uppercase; letter-spacing: 0.4px; }
+  .sig-field-preview-val { font-size: 13px; color: #1a1a2e; font-weight: 500; }
+
   /* SIGNATURE CANVAS MODAL */
   .sig-canvas-overlay { position: fixed; inset: 0; background: rgba(180,185,210,0.55); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); display: none; align-items: center; justify-content: center; z-index: 2000; }
   .sig-canvas-overlay.visible { display: flex; }
@@ -578,7 +591,7 @@
           </div>
           <div class="cf-field">
             <div class="cf-label">Lead Source</div>
-            <div class="cf-input-wrap"><select class="cf-select"><option>-None-</option><option>Web</option><option>Phone</option><option>Referral</option></select></div>
+            <div class="cf-input-wrap"><select class="cf-select" id="cfLeadSource"><option>-None-</option><option>Web</option><option>Phone</option><option>Referral</option></select></div>
           </div>
           <div class="cf-field">
             <div class="cf-label">Multi-Line 1</div>
@@ -598,11 +611,11 @@
           </div>
           <div class="cf-field">
             <div class="cf-label">First Name</div>
-            <div class="cf-input-wrap"><div style="display:flex;gap:4px;"><select style="width:80px;border:1px solid #d0d0d0;border-radius:3px;padding:6px 4px;font-size:12px;background:white;"><option>-None-</option><option>Mr.</option><option>Ms.</option><option>Mrs.</option><option>Dr.</option></select><input class="cf-input" /></div></div>
+            <div class="cf-input-wrap"><div style="display:flex;gap:4px;"><select style="width:80px;border:1px solid #d0d0d0;border-radius:3px;padding:6px 4px;font-size:12px;background:white;"><option>-None-</option><option>Mr.</option><option>Ms.</option><option>Mrs.</option><option>Dr.</option></select><input class="cf-input" id="cfFirstName" /></div></div>
           </div>
           <div class="cf-field">
             <div class="cf-label">Date of Birth</div>
-            <div class="cf-input-wrap"><input class="cf-input" type="date" /></div>
+            <div class="cf-input-wrap"><input class="cf-input" type="date" id="cfDob" /></div>
           </div>
           <div class="cf-field">
             <div class="cf-label">Account Name</div>
@@ -618,7 +631,7 @@
           </div>
           <div class="cf-field">
             <div class="cf-label">Contact Status</div>
-            <div class="cf-input-wrap"><select class="cf-select"><option>-None-</option><option>Active</option><option>Inactive</option></select></div>
+            <div class="cf-input-wrap"><select class="cf-select" id="cfContactStatus"><option>-None-</option><option>Active</option><option>Inactive</option></select></div>
           </div>
           <div class="cf-field">
             <div class="cf-label">Checkbox 2</div>
@@ -809,6 +822,21 @@
       <div class="preview-body" id="previewBody" style="color:#bbb;font-style:italic;">Consent body text will appear here...</div>
     </div>
     <div class="mdivider"></div>
+    <div class="field-group">
+      <div class="field-label">Show fields in signing preview <span class="iicon">i</span></div>
+      <div style="font-size:11px;color:#888;margin-bottom:8px;">Selected fields will be shown to the customer above the consent text when signing.</div>
+      <div class="fp-list">
+        <div class="fp-item" onclick="togglePreviewField(this,'First Name')"><div class="cb-box"></div><span>First Name</span></div>
+        <div class="fp-item" onclick="togglePreviewField(this,'Last Name')"><div class="cb-box"></div><span>Last Name</span></div>
+        <div class="fp-item" onclick="togglePreviewField(this,'Date of Birth')"><div class="cb-box"></div><span>Date of Birth</span></div>
+        <div class="fp-item" onclick="togglePreviewField(this,'Account Name')"><div class="cb-box"></div><span>Account Name</span></div>
+        <div class="fp-item" onclick="togglePreviewField(this,'Email')"><div class="cb-box"></div><span>Email</span></div>
+        <div class="fp-item" onclick="togglePreviewField(this,'Contact Status')"><div class="cb-box"></div><span>Contact Status</span></div>
+        <div class="fp-item" onclick="togglePreviewField(this,'Lead Source')"><div class="cb-box"></div><span>Lead Source</span></div>
+        <div class="fp-item" onclick="togglePreviewField(this,'Contact Owner')"><div class="cb-box"></div><span>Contact Owner</span></div>
+      </div>
+    </div>
+    <div class="mdivider"></div>
     <div class="cb-row" onclick="toggleCb(this)"><div class="cb-box"></div><span class="cb-label">Required</span></div>
     <div class="cb-row" onclick="toggleCb(this)"><div class="cb-box"></div><span class="cb-label">Contains Personal Data <span class="iicon">i</span></span></div>
     <div class="cb-row" onclick="toggleCb(this)"><div class="cb-box"></div><span class="cb-label">Show Tooltip</span></div>
@@ -826,6 +854,10 @@
     <div class="sig-canvas-hdr">
       <div class="sig-canvas-hdr-title" id="canvasModalTitle">Customer Signature</div>
       <div class="sig-canvas-close" onclick="closeSigCanvas()">✕</div>
+    </div>
+    <div id="sigFieldsPreviewBox" class="sig-fields-preview" style="display:none;">
+      <div class="sig-fields-preview-title">Record Details</div>
+      <div class="sig-fields-grid" id="sigFieldsGrid"></div>
     </div>
     <div class="sig-consent-box" id="sigConsentBox">
       <div class="sig-consent-ttl" id="canvasConsentTitle">Physiotherapy Treatment Consent</div>
@@ -862,10 +894,33 @@
   var savedConsentBody = '';
   var savedFieldLabel = 'Customer Signature';
   var savedSignatureDataURL = null;
+  var savedPreviewFields = [];
   var hasDrawn = false;
   var drawCtx = null;
   var drawing = false;
   var lastX = 0, lastY = 0;
+
+  /* Field label → form element ID mapping */
+  var fieldIdMap = {
+    'First Name':     function(){ return document.getElementById('cfFirstName') ? document.getElementById('cfFirstName').value || '—' : '—'; },
+    'Last Name':      function(){ return document.getElementById('cfLastName')  ? document.getElementById('cfLastName').value  || '—' : '—'; },
+    'Date of Birth':  function(){ return document.getElementById('cfDob')       ? document.getElementById('cfDob').value       || '—' : '—'; },
+    'Account Name':   function(){ return '—'; },
+    'Email':          function(){ return document.getElementById('cfEmail')     ? document.getElementById('cfEmail').value     || '—' : '—'; },
+    'Contact Status': function(){ var el=document.getElementById('cfContactStatus'); return el ? el.value||'—':'—'; },
+    'Lead Source':    function(){ var el=document.getElementById('cfLeadSource');    return el ? el.value||'—':'—'; },
+    'Contact Owner':  function(){ return 'Sridhar'; }
+  };
+
+  function togglePreviewField(row, fieldName) {
+    var box = row.querySelector('.cb-box');
+    box.classList.toggle('checked');
+    if (box.classList.contains('checked')) {
+      savedPreviewFields.push(fieldName);
+    } else {
+      savedPreviewFields = savedPreviewFields.filter(function(f){ return f !== fieldName; });
+    }
+  }
 
   /* ── SCREEN NAV ── */
   function showScreen(id) {
@@ -962,6 +1017,8 @@
   /* ── SIGNATURE CANVAS MODAL ── */
   function openSignatureCanvas() {
     document.getElementById('canvasModalTitle').textContent = savedFieldLabel || 'Customer Signature';
+
+    // Consent text
     if (savedConsentTitle || savedConsentBody) {
       document.getElementById('canvasConsentTitle').textContent = savedConsentTitle || 'Consent Agreement';
       document.getElementById('canvasConsentBody').textContent = savedConsentBody;
@@ -969,6 +1026,24 @@
       document.getElementById('canvasConsentTitle').textContent = 'Physiotherapy Treatment Consent';
       document.getElementById('canvasConsentBody').textContent = 'I consent to physiotherapy treatment for my bone and musculoskeletal condition. I understand that treatment may involve physical contact including manual therapy, joint mobilisation, and exercise. I acknowledge that physiotherapy carries some risk including temporary pain or discomfort, and that the therapist has explained the proposed treatment, its benefits, and alternatives. I confirm that I have disclosed all relevant medical history and agree to inform my therapist of any changes in my condition.';
     }
+
+    // Field preview
+    var previewBox = document.getElementById('sigFieldsPreviewBox');
+    var grid = document.getElementById('sigFieldsGrid');
+    grid.innerHTML = '';
+    if (savedPreviewFields.length > 0) {
+      savedPreviewFields.forEach(function(fieldName) {
+        var val = fieldIdMap[fieldName] ? fieldIdMap[fieldName]() : '—';
+        var item = document.createElement('div');
+        item.className = 'sig-field-preview-item';
+        item.innerHTML = '<div class="sig-field-preview-lbl">' + fieldName + '</div><div class="sig-field-preview-val">' + val + '</div>';
+        grid.appendChild(item);
+      });
+      previewBox.style.display = 'block';
+    } else {
+      previewBox.style.display = 'none';
+    }
+
     document.getElementById('sigCanvasOverlay').classList.add('visible');
     initDrawCanvas();
   }
