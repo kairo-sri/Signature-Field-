@@ -1041,7 +1041,7 @@
     var dateStr = now.toLocaleDateString('en-US', {month:'short',day:'numeric',year:'numeric'});
     var timeStr = now.toLocaleTimeString('en-US', {hour:'2-digit',minute:'2-digit'});
     document.getElementById('dvCreatedDate').textContent = dateStr;
-    document.getElementById('dvSigDate').textContent = dateStr + ' · ' + timeStr;
+    var dvSigDate = document.getElementById('dvSigDate'); if (dvSigDate) dvSigDate.textContent = dateStr + ' · ' + timeStr;
     // render signature on detail canvas (if signed)
     if (savedSignatureDataURL) { renderSigOnCanvas('dvSigCanvas', 360, 80); }
     // add to list
