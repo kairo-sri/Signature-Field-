@@ -889,11 +889,6 @@
 
   /* ── SAVE CONTACT ── */
   function saveContact() {
-    if (!savedSignatureDataURL) {
-      showToast('⚠️ Please sign the signature field before saving');
-      document.getElementById('cfSigClick').style.borderColor = '#e03e3e';
-      return;
-    }
     var lastName = document.getElementById('cfLastName').value.trim() || 'New Contact';
     var email = document.getElementById('cfEmail').value.trim();
     // populate detail view
@@ -906,8 +901,8 @@
     var timeStr = now.toLocaleTimeString('en-US', {hour:'2-digit',minute:'2-digit'});
     document.getElementById('dvCreatedDate').textContent = dateStr;
     document.getElementById('dvSigDate').textContent = dateStr + ' · ' + timeStr;
-    // render signature on detail canvas
-    renderSigOnCanvas('dvSigCanvas', 360, 80);
+    // render signature on detail canvas (if signed)
+    if (savedSignatureDataURL) { renderSigOnCanvas('dvSigCanvas', 360, 80); }
     // add to list
     addNewContactToList(lastName, email);
     showToast('✅ Contact saved — signature is now locked');
