@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #2d2d4e;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 20px;
+  }
+
+  /* Backdrop */
+  .backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Modal */
+  .modal {
+    background: white;
+    border-radius: 12px;
+    padding: 32px 36px 28px;
+    width: 520px;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  }
+
+  /* Title */
+  .modal-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin-bottom: 24px;
+  }
+
+  /* Field group */
+  .field-group {
+    margin-bottom: 20px;
+  }
+
+  .field-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #1a1a2e;
+    margin-bottom: 7px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .field-label .required { color: #e03e3e; font-size: 14px; }
+  .field-label .info-icon {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 1.5px solid #e8960c;
+    color: #e8960c;
+    font-size: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    cursor: pointer;
+    margin-left: 2px;
+  }
+
+  /* Text input */
+  .text-input {
+    width: 100%;
+    border: 1.5px solid #3b5bdb;
+    border-radius: 6px;
+    padding: 10px 12px;
+    font-size: 14px;
+    color: #1a1a2e;
+    outline: none;
+    font-family: inherit;
+  }
+  .text-input:focus { border-color: #3b5bdb; box-shadow: 0 0 0 3px rgba(59,91,219,0.1); }
+  .text-input.inactive { border-color: #d0d0d0; }
+  .text-input.inactive:focus { border-color: #3b5bdb; box-shadow: 0 0 0 3px rgba(59,91,219,0.1); }
+
+  /* Textarea */
+  .text-area {
+    width: 100%;
+    border: 1.5px solid #d0d0d0;
+    border-radius: 6px;
+    padding: 10px 12px;
+    font-size: 13.5px;
+    color: #1a1a2e;
+    outline: none;
+    font-family: inherit;
+    resize: vertical;
+    min-height: 90px;
+    line-height: 1.5;
+  }
+  .text-area:focus { border-color: #3b5bdb; box-shadow: 0 0 0 3px rgba(59,91,219,0.1); }
+
+  /* Character count */
+  .char-count {
+    text-align: right;
+    font-size: 11px;
+    color: #999;
+    margin-top: 4px;
+  }
+
+  /* Divider */
+  .divider {
+    height: 1px;
+    background: #f0f0f0;
+    margin: 20px 0;
+  }
+
+  /* Section subtitle */
+  .section-subtitle {
+    font-size: 11px;
+    font-weight: 600;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 14px;
+  }
+
+
+
+  /* Checkbox row */
+  .checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+    cursor: pointer;
+  }
+  .checkbox-row:last-child { margin-bottom: 0; }
+  .checkbox {
+    width: 18px;
+    height: 18px;
+    border: 1.5px solid #ccc;
+    border-radius: 3px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+  }
+  .checkbox-label {
+    font-size: 14px;
+    color: #1a1a2e;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* Consent preview box */
+  .consent-preview {
+    background: #f8f9ff;
+    border: 1px solid #e0e5ff;
+    border-radius: 6px;
+    padding: 12px 14px;
+    margin-top: 10px;
+  }
+  .consent-preview-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: #3b5bdb;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+  }
+  .consent-preview-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #1a1a2e;
+    margin-bottom: 4px;
+  }
+  .consent-preview-body {
+    font-size: 12px;
+    color: #555;
+    line-height: 1.5;
+  }
+
+  /* Footer buttons */
+  .modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 28px;
+  }
+  .btn {
+    padding: 10px 28px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+    border: none;
+  }
+  .btn-cancel {
+    background: white;
+    border: 1.5px solid #ccc;
+    color: #444;
+  }
+  .btn-cancel:hover { background: #f5f5f5; }
+  .btn-done {
+    background: #3b5bdb;
+    color: white;
+  }
+  .btn-done:hover { background: #3451c7; }
+</style>
+</head>
+<body>
+
+<div class="backdrop">
+  <div class="modal">
+
+    <div class="modal-title">Signature Field Properties</div>
+
+    <!-- SECTION 1: Basic -->
+    <div class="section-subtitle">Basic</div>
+
+    <!-- Field Label -->
+    <div class="field-group">
+      <div class="field-label">
+        Field Label <span class="required">*</span>
+      </div>
+      <input type="text" class="text-input" value="Customer Signature" />
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- SECTION 2: Consent Text -->
+    <div class="section-subtitle">Consent Text</div>
+
+    <!-- Consent Title -->
+    <div class="field-group">
+      <div class="field-label">
+        Consent Title
+        <span class="info-icon">i</span>
+      </div>
+      <input
+        type="text"
+        class="text-input inactive"
+        value="Treatment Consent Acknowledgement"
+        maxlength="100"
+        id="consentTitle"
+        oninput="updatePreview()"
+      />
+      <div class="char-count"><span id="titleCount">38</span> / 100</div>
+    </div>
+
+    <!-- Consent Body -->
+    <div class="field-group">
+      <div class="field-label">
+        Consent Body
+        <span class="info-icon">i</span>
+      </div>
+      <textarea
+        class="text-area"
+        maxlength="500"
+        id="consentBody"
+        oninput="updatePreview()"
+      >I agree that the treatment requires physical contact with my body as part of the procedure. This may result in recovery or temporary discomfort.</textarea>
+      <div class="char-count"><span id="bodyCount">157</span> / 500</div>
+    </div>
+
+    <!-- Live Preview -->
+    <div class="consent-preview">
+      <div class="consent-preview-label">Preview — what customer sees</div>
+      <div class="consent-preview-title" id="previewTitle">Treatment Consent Acknowledgement</div>
+      <div class="consent-preview-body" id="previewBody">I agree that the treatment requires physical contact with my body as part of the procedure. This may result in recovery or temporary discomfort.</div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="checkbox-row">
+      <div class="checkbox"></div>
+      <span class="checkbox-label">Required</span>
+    </div>
+
+    <div class="checkbox-row">
+      <div class="checkbox"></div>
+      <span class="checkbox-label">
+        Contains Personal Data
+        <span class="info-icon">i</span>
+      </span>
+    </div>
+
+    <div class="checkbox-row">
+      <div class="checkbox"></div>
+      <span class="checkbox-label">Show Tooltip</span>
+    </div>
+
+    <!-- Footer -->
+    <div class="modal-footer">
+      <button class="btn btn-cancel">Cancel</button>
+      <button class="btn btn-done">Done</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  function updatePreview() {
+    const title = document.getElementById('consentTitle').value;
+    const body = document.getElementById('consentBody').value;
+    document.getElementById('previewTitle').textContent = title;
+    document.getElementById('previewBody').textContent = body;
+    document.getElementById('titleCount').textContent = title.length;
+    document.getElementById('bodyCount').textContent = body.length;
+  }
+
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 13px; color: #1a1a2e; height: 100vh; overflow: hidden; }
+
+  /* ===================== SCREENS ===================== */
+  .screen { display: none; flex-direction: column; height: 100vh; }
+  .screen.active { display: flex; }
+
+  /* ===================== SHARED NAV ===================== */
+  .topnav { background: white; border-bottom: 1px solid #e8e8e8; display: flex; align-items: center; padding: 0 16px; height: 52px; gap: 0; flex-shrink: 0; }
+  .zoho-logo { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 15px; color: #1a1a2e; margin-right: 16px; cursor: pointer; }
+  .zoho-logo .logo-icon { width: 28px; height: 28px; background: linear-gradient(135deg, #e8472a, #f5a623); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; font-size: 14px; font-weight: 900; }
+  .nav-toggle { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; color: #666; cursor: pointer; border-radius: 4px; margin-right: 12px; font-size: 16px; }
+  .page-title { font-size: 18px; font-weight: 700; color: #1a1a2e; margin-right: 10px; }
+  .page-title.clickable { cursor: pointer; padding: 4px 8px; border-radius: 6px; transition: background 0.15s; }
+  .page-title.clickable:hover { background: #f0f4ff; color: #3b5bdb; }
+  .territory-btn { background: white; border: 1px solid #e0e0e0; border-radius: 6px; padding: 5px 12px; font-size: 12px; color: #444; cursor: pointer; }
+  .search-bar { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+  .search-wrap { position: relative; }
+  .search-wrap::before { content: '🔍'; position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 12px; }
+  .search-input { background: #f5f6fa; border: 1px solid #e8e8e8; border-radius: 8px; padding: 7px 14px 7px 34px; font-size: 13px; color: #666; width: 200px; }
+  .nav-icons { display: flex; align-items: center; gap: 6px; margin-left: 12px; }
+  .nav-icon { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; color: #666; cursor: pointer; border-radius: 6px; font-size: 16px; position: relative; }
+  .nav-icon:hover { background: #f5f6fa; }
+  .notif-badge { position: absolute; top: 3px; right: 3px; width: 14px; height: 14px; background: #e03e3e; border-radius: 50%; color: white; font-size: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+  .avatar-circle { width: 30px; height: 30px; background: #dde1f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #555; cursor: pointer; }
+
+  /* ===================== SIDEBAR ===================== */
+  .main-layout { display: flex; flex: 1; overflow: hidden; }
+  .sidebar { width: 220px; background: #1a1a2e; display: flex; flex-direction: column; overflow-y: auto; flex-shrink: 0; }
+  .sidebar-item { display: flex; align-items: center; gap: 10px; padding: 9px 16px; font-size: 13px; color: #b0b8d0; cursor: pointer; }
+  .sidebar-item:hover { background: rgba(255,255,255,0.08); color: white; }
+  .sidebar-item.active { background: rgba(59,91,219,0.2); color: white; border-right: 3px solid #3b5bdb; }
+  .sidebar-item .si { font-size: 15px; width: 20px; text-align: center; }
+  .sidebar-team { display: flex; align-items: center; justify-content: space-between; padding: 8px 16px; }
+  .sidebar-team-label { font-size: 11px; font-weight: 600; color: #7c8db0; text-transform: uppercase; letter-spacing: 0.5px; }
+  .sidebar-search { margin: 6px 12px; background: rgba(255,255,255,0.08); border: none; border-radius: 6px; padding: 6px 10px; color: #b0b8d0; font-size: 12px; width: calc(100% - 24px); font-family: inherit; }
+  .sidebar-search::placeholder { color: #7c8db0; }
+  .sidebar-search:focus { outline: none; }
+  .teamspace-item { display: flex; align-items: center; gap: 8px; padding: 7px 16px; font-size: 12px; color: #b0b8d0; cursor: pointer; }
+  .ts-icon { width: 20px; height: 20px; background: #3b5bdb; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: white; font-size: 10px; font-weight: 700; }
+
+  /* ===================== LIST VIEW ===================== */
+  .content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  .sub-tabs { background: white; border-bottom: 1px solid #e8e8e8; padding: 0 16px; display: flex; align-items: center; gap: 4px; height: 40px; overflow-x: auto; flex-shrink: 0; }
+  .sub-tab { display: flex; align-items: center; gap: 5px; padding: 6px 12px; border-radius: 20px; font-size: 12px; color: #444; cursor: pointer; white-space: nowrap; }
+  .sub-tab:hover { background: #f5f6fa; }
+  .sub-tab.active { background: #eef2ff; color: #3b5bdb; font-weight: 500; }
+  .toolbar { background: white; border-bottom: 1px solid #e8e8e8; padding: 8px 16px; display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+  .tool-btn { display: flex; align-items: center; gap: 5px; padding: 5px 10px; border: 1px solid #e0e0e0; border-radius: 6px; font-size: 12px; color: #444; cursor: pointer; background: white; font-family: inherit; }
+  .view-icons { display: flex; align-items: center; gap: 2px; margin-left: 4px; }
+  .view-icon { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 4px; cursor: pointer; font-size: 14px; color: #666; }
+  .view-icon.active { background: #eef2ff; color: #3b5bdb; }
+  .create-btn-main { background: #3b5bdb; border: none; color: white; border-radius: 6px 0 0 6px; padding: 7px 14px; font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit; }
+  .create-btn-arrow { background: #2a4bc4; border: none; color: white; border-radius: 0 6px 6px 0; padding: 7px 8px; cursor: pointer; font-size: 13px; }
+  .more-btn { width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border: 1px solid #e0e0e0; border-radius: 6px; cursor: pointer; font-size: 15px; color: #666; }
+  .table-wrap { flex: 1; display: flex; overflow: hidden; }
+  .filter-panel { width: 220px; background: white; border-right: 1px solid #e8e8e8; overflow-y: auto; flex-shrink: 0; padding: 12px 0; }
+  .filter-title { font-size: 13px; font-weight: 600; color: #1a1a2e; padding: 0 14px 10px; }
+  .filter-search { margin: 0 10px 10px; background: #f5f6fa; border: 1px solid #e8e8e8; border-radius: 6px; padding: 6px 10px; font-size: 12px; color: #666; width: calc(100% - 20px); font-family: inherit; }
+  .filter-section-title { font-size: 12px; font-weight: 600; color: #333; padding: 6px 14px 4px; cursor: pointer; }
+  .filter-item { display: flex; align-items: flex-start; gap: 8px; padding: 5px 14px; font-size: 12px; color: #555; cursor: pointer; }
+  .filter-item:hover { background: #f9faff; }
+  .filter-cb { width: 14px; height: 14px; border: 1.5px solid #ccc; border-radius: 3px; flex-shrink: 0; margin-top: 1px; }
+  .table-content { flex: 1; overflow: auto; }
+  table { width: 100%; border-collapse: collapse; }
+  thead { background: white; position: sticky; top: 0; z-index: 10; }
+  th { padding: 10px 14px; font-size: 12px; font-weight: 600; color: #555; text-align: left; border-bottom: 1px solid #e8e8e8; white-space: nowrap; cursor: pointer; }
+  td { padding: 10px 14px; font-size: 13px; color: #333; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
+  tr:hover td { background: #f9faff; }
+  .contact-name { color: #3b5bdb; cursor: pointer; font-weight: 500; }
+  .account-name { color: #3b5bdb; cursor: pointer; }
+  .cb-col { width: 36px; padding: 10px 8px 10px 14px; }
+  .row-cb { width: 15px; height: 15px; border: 1.5px solid #ccc; border-radius: 3px; cursor: pointer; }
+  .sig-thumb { width: 80px; height: 36px; background: #f8f8f8; border: 1px solid #e0e0e0; border-radius: 4px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; overflow: hidden; }
+  .sig-thumb.unsigned { background: #fafafa; border: 1px dashed #ddd; color: #bbb; font-size: 11px; }
+  .sig-overlay { position: absolute; inset: 0; background: rgba(59,91,219,0.08); opacity: 0; transition: opacity 0.15s; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #3b5bdb; font-weight: 600; }
+  .sig-thumb:hover .sig-overlay { opacity: 1; }
+  .sig-col-header { display: flex; align-items: center; gap: 5px; }
+  .sig-col-badge { background: #eef2ff; color: #3b5bdb; font-size: 9px; font-weight: 700; padding: 1px 5px; border-radius: 3px; }
+  .table-footer { background: white; border-top: 1px solid #e8e8e8; padding: 10px 16px; display: flex; align-items: center; font-size: 12px; color: #666; flex-shrink: 0; }
+  .pagination { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+  .page-btn { width: 26px; height: 26px; border: 1px solid #e0e0e0; border-radius: 4px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 13px; color: #444; background: white; }
+  .sig-svg { width: 78px; height: 34px; }
+  .sig-tooltip { position: fixed; background: white; border: 1px solid #e0e0e0; border-radius: 8px; padding: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); display: none; z-index: 999; width: 200px; }
+  .sig-tooltip.visible { display: block; }
+  .sig-tooltip-img { width: 100%; height: 70px; background: #f8f8f8; border-radius: 4px; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; }
+  .sig-tooltip-meta { font-size: 11px; color: #666; line-height: 1.6; }
+  .sig-tooltip-meta strong { color: #333; }
+  .bottom-bar { height: 44px; background: white; border-top: 1px solid #e8e8e8; display: flex; align-items: center; justify-content: space-around; flex-shrink: 0; }
+  .bb-item { display: flex; flex-direction: column; align-items: center; font-size: 10px; color: #888; gap: 1px; cursor: pointer; }
+  .bb-item .bi { font-size: 15px; }
+
+  /* ===================== LAYOUT BUILDER ===================== */
+  .lb-topnav { background: #1a1a2e; color: white; display: flex; align-items: center; padding: 0 16px; height: 44px; gap: 12px; flex-shrink: 0; }
+  .lb-topnav .back { font-size: 16px; color: #aaa; cursor: pointer; }
+  .lb-topnav .breadcrumb { font-size: 13px; color: #ccc; }
+  .lb-topnav .breadcrumb span { color: white; font-weight: 500; }
+  .lb-topnav .gear { margin-left: 6px; color: #aaa; font-size: 14px; }
+  .lb-topnav .actions { margin-left: auto; display: flex; gap: 8px; }
+  .lb-btn { padding: 5px 14px; border-radius: 4px; cursor: pointer; font-size: 12px; font-family: inherit; }
+  .lb-btn-cancel { background: transparent; border: 1px solid #555; color: #ccc; }
+  .lb-btn-saveclose { background: #2d2d4e; border: 1px solid #555; color: #ccc; }
+  .lb-btn-save { background: #3b5bdb; border: none; color: white; font-weight: 500; }
+  .lb-layout { display: flex; flex: 1; overflow: hidden; }
+  .lb-left { width: 242px; background: white; border-right: 1px solid #e0e0e0; overflow-y: auto; flex-shrink: 0; }
+  .lb-panel-title { padding: 10px 14px 6px; font-size: 12px; font-weight: 600; color: #333; display: flex; align-items: center; gap: 4px; cursor: pointer; }
+  .field-grid { display: grid; grid-template-columns: 1fr 1fr; padding: 0 8px 8px; }
+  .field-item { display: flex; align-items: center; gap: 5px; padding: 6px 7px; border-radius: 4px; cursor: grab; font-size: 11.5px; color: #333; white-space: nowrap; overflow: hidden; user-select: none; }
+  .field-item:hover { background: #f0f4ff; }
+  .field-item .icon { font-size: 12px; color: #666; flex-shrink: 0; width: 16px; text-align: center; }
+  .field-item.dragging { opacity: 0.4; }
+  .field-item.sig-new { background: #eef2ff; border: 1.5px dashed #3b5bdb; color: #3b5bdb; font-weight: 600; position: relative; cursor: grab; }
+  .field-item.sig-new .icon { color: #3b5bdb; }
+  .new-badge { position: absolute; top: -7px; right: 2px; background: #3b5bdb; color: white; font-size: 8px; font-weight: 700; padding: 1px 4px; border-radius: 3px; pointer-events: none; }
+  .lb-divider { height: 1px; background: #f0f0f0; margin: 4px 8px; }
+  .full-width-item { grid-column: span 2; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 6px 10px; margin: 2px 0; border-radius: 4px; font-size: 11.5px; color: #444; cursor: grab; background: #f8f8f8; }
+  .full-width-item.dashed { border: 1px dashed #ccc; background: white; color: #666; }
+  .comp-item { margin: 2px 8px; padding: 6px 10px; background: #f8f8f8; border-radius: 4px; font-size: 11.5px; color: #444; cursor: grab; display: flex; align-items: center; gap: 6px; }
+  .unused-bar { padding: 8px 14px 2px; font-size: 12px; color: #333; display: flex; align-items: center; gap: 6px; font-weight: 600; }
+  .badge { background: #e8eaf6; color: #3b5bdb; font-size: 11px; font-weight: 600; padding: 1px 7px; border-radius: 10px; }
+  .custom-left { padding: 2px 14px 10px; font-size: 11px; color: #3b5bdb; }
+  .lb-main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  .lb-tab-bar { background: white; border-bottom: 1px solid #e0e0e0; display: flex; align-items: center; padding: 0 80px; height: 42px; gap: 32px; flex-shrink: 0; }
+  .lb-tab { font-size: 13px; color: #666; padding: 12px 0; cursor: pointer; border-bottom: 2px solid transparent; }
+  .lb-tab.active { color: #3b5bdb; border-bottom: 2px solid #3b5bdb; font-weight: 500; }
+  .lb-canvas { flex: 1; overflow-y: auto; padding: 18px 36px; background: #f5f6fa; }
+  .form-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+  .form-title { font-size: 15px; font-weight: 600; color: #1a1a2e; }
+  .form-btns { display: flex; gap: 8px; }
+  .fb { padding: 5px 13px; border-radius: 4px; font-size: 12px; cursor: pointer; font-family: inherit; }
+  .fb.cancel { background: white; border: 1px solid #ccc; color: #444; }
+  .fb.save { background: #3b5bdb; border: none; color: white; font-weight: 500; }
+  .manage-link { text-align: right; font-size: 11px; color: #3b5bdb; margin-bottom: 14px; cursor: pointer; }
+  .li-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 12px; font-weight: 500; color: #333; }
+  .toggle { width: 32px; height: 17px; background: #3b5bdb; border-radius: 8px; position: relative; flex-shrink: 0; }
+  .toggle::after { content:''; position: absolute; width: 13px; height: 13px; background: white; border-radius: 50%; top: 2px; right: 2px; }
+  .avatar-wrap { margin-bottom: 16px; }
+  .dots-above { font-size: 12px; color: #999; letter-spacing: 3px; margin-bottom: 2px; }
+  .avatar { width: 50px; height: 50px; background: #dde1f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #888; font-size: 20px; }
+  .form-section { background: white; border: 1px solid #e0e0e0; border-radius: 6px; overflow: hidden; }
+  .sec-hdr { padding: 9px 16px; font-size: 13px; font-weight: 600; color: #333; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; justify-content: space-between; }
+  .sec-hdr .sg { color: #999; font-size: 13px; cursor: pointer; }
+  .fields-grid { display: grid; grid-template-columns: 1fr 1fr; }
+  .frow { display: flex; align-items: center; padding: 9px 16px; border-bottom: 1px solid #f5f5f5; border-right: 1px solid #f5f5f5; gap: 7px; color: #444; font-size: 12px; cursor: pointer; }
+  .frow:hover { background: #f9faff; }
+  .frow .fi { color: #999; font-size: 12px; flex-shrink: 0; }
+  .frow .fd { margin-left: auto; color: #ccc; font-size: 13px; letter-spacing: 1px; }
+  .frow .utag { font-size: 10px; color: #999; background: #f0f0f0; padding: 1px 5px; border-radius: 3px; }
+  .frow.rb { border-left: 3px solid #e03e3e; }
+  .drop-zone { grid-column: span 2; border: 2px dashed #3b5bdb; border-radius: 4px; padding: 16px; display: none; align-items: center; justify-content: center; color: #3b5bdb; font-size: 12px; font-weight: 500; background: #f0f4ff; gap: 8px; }
+  .drop-zone.visible { display: flex; }
+  .drop-zone.over { background: #dde5ff; border-color: #2a4bc4; }
+  .sig-field-row { grid-column: span 2; display: flex; align-items: center; padding: 12px 16px; border-bottom: 1px solid #f5f5f5; gap: 10px; background: #f0f4ff; border-left: 3px solid #3b5bdb; }
+  .sig-field-row .sig-icon { font-size: 16px; }
+  .sig-field-row .sig-label { font-size: 12px; font-weight: 600; color: #3b5bdb; }
+  .sig-field-row .sig-sub { font-size: 11px; color: #888; margin-top: 1px; }
+  .drag-ghost { position: fixed; pointer-events: none; background: #eef2ff; border: 1.5px dashed #3b5bdb; border-radius: 4px; padding: 6px 10px; font-size: 12px; color: #3b5bdb; font-weight: 600; display: none; z-index: 9999; white-space: nowrap; gap: 6px; align-items: center; }
+  .step-bar { background: #1a1a2e; padding: 6px 16px; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .step { font-size: 11px; color: #888; display: flex; align-items: center; gap: 6px; }
+  .step.active { color: #7c9fff; font-weight: 600; }
+  .step.done { color: #4caf50; }
+  .step-dot { width: 6px; height: 6px; border-radius: 50%; background: #555; }
+  .step.active .step-dot { background: #7c9fff; }
+  .step.done .step-dot { background: #4caf50; }
+  .step-arrow { color: #555; font-size: 10px; }
+  .hint { background: #1a1a2e; color: #fff; font-size: 11px; padding: 6px 10px; border-radius: 5px; position: fixed; pointer-events: none; display: none; z-index: 9998; white-space: nowrap; }
+
+  /* ===================== MODAL ===================== */
+  .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.45); display: none; align-items: center; justify-content: center; z-index: 1000; }
+  .modal-backdrop.visible { display: flex; }
+  .modal { background: white; border-radius: 12px; padding: 28px 32px 24px; width: 500px; max-height: 88vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+  .modal-title { font-size: 20px; font-weight: 700; color: #1a1a2e; margin-bottom: 22px; }
+  .field-group { margin-bottom: 18px; }
+  .field-label { font-size: 13px; font-weight: 500; color: #1a1a2e; margin-bottom: 6px; display: flex; align-items: center; gap: 4px; }
+  .field-label .req { color: #e03e3e; }
+  .field-label .iicon { width: 15px; height: 15px; border-radius: 50%; border: 1.5px solid #e8960c; color: #e8960c; font-size: 9px; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; cursor: pointer; margin-left: 2px; }
+  .text-input { width: 100%; border: 1.5px solid #3b5bdb; border-radius: 6px; padding: 9px 11px; font-size: 13px; color: #1a1a2e; outline: none; font-family: inherit; }
+  .text-input.idle { border-color: #d0d0d0; }
+  .text-input:focus { border-color: #3b5bdb; box-shadow: 0 0 0 3px rgba(59,91,219,0.1); }
+  .text-area { width: 100%; border: 1.5px solid #d0d0d0; border-radius: 6px; padding: 9px 11px; font-size: 13px; color: #1a1a2e; outline: none; font-family: inherit; resize: vertical; min-height: 80px; line-height: 1.5; }
+  .text-area:focus { border-color: #3b5bdb; box-shadow: 0 0 0 3px rgba(59,91,219,0.1); }
+  .char-count { text-align: right; font-size: 11px; color: #aaa; margin-top: 3px; }
+  .mdivider { height: 1px; background: #f0f0f0; margin: 16px 0; }
+  .consent-preview { background: #f8f9ff; border: 1px solid #e0e5ff; border-radius: 6px; padding: 11px 13px; margin-top: 8px; }
+  .preview-label { font-size: 10px; font-weight: 600; color: #3b5bdb; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; }
+  .preview-title { font-size: 12px; font-weight: 600; color: #1a1a2e; margin-bottom: 3px; }
+  .preview-body { font-size: 11.5px; color: #555; line-height: 1.5; }
+  .cb-row { display: flex; align-items: center; gap: 9px; margin-bottom: 14px; cursor: pointer; }
+  .cb-row:last-child { margin-bottom: 0; }
+  .cb-box { width: 17px; height: 17px; border: 1.5px solid #ccc; border-radius: 3px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: white; transition: all 0.15s; }
+  .cb-box.checked { background: #3b5bdb; border-color: #3b5bdb; }
+  .cb-box.checked::after { content: '✓'; color: white; font-size: 10px; font-weight: 700; }
+  .cb-label { font-size: 13px; color: #1a1a2e; display: flex; align-items: center; gap: 5px; }
+  .modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; }
+  .mbtn { padding: 9px 26px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; font-family: inherit; border: none; }
+  .mbtn-cancel { background: white; border: 1.5px solid #ccc; color: #444; }
+  .mbtn-done { background: #3b5bdb; color: white; }
+
+  /* Toast */
+  .toast { position: fixed; bottom: 60px; left: 50%; transform: translateX(-50%); background: #1a1a2e; color: white; padding: 10px 20px; border-radius: 8px; font-size: 13px; display: none; z-index: 9999; white-space: nowrap; }
+  .toast.visible { display: block; animation: fadeInOut 2.5s ease forwards; }
+  @keyframes fadeInOut { 0%{opacity:0;transform:translateX(-50%) translateY(10px)} 15%{opacity:1;transform:translateX(-50%) translateY(0)} 80%{opacity:1} 100%{opacity:0} }
+</style>
+</head>
+<body>
+
+<!-- ==================== SCREEN 1: LIST VIEW ==================== -->
+<div class="screen active" id="screen-list">
+  <div class="topnav">
+    <div class="zoho-logo"><div class="logo-icon">Z</div> Zoho CRM</div>
+    <div class="nav-toggle">☰</div>
+    <div class="page-title clickable" onclick="goToLayoutBuilder()" title="Click to open Layout Builder">Contacts ✏️</div>
+    <div class="territory-btn">All Territories ▾</div>
+    <div class="search-bar">
+      <div class="search-wrap"><input class="search-input" placeholder="Search records" /></div>
+      <div class="nav-icons">
+        <div class="nav-icon">➕</div>
+        <div class="nav-icon">🔔<span class="notif-badge">1</span></div>
+        <div class="nav-icon">📅</div>
+        <div class="nav-icon">⚙</div>
+        <div class="avatar-circle">👤</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="main-layout">
+    <div class="sidebar">
+      <div style="padding:8px 0;">
+        <div class="sidebar-item"><span class="si">🏠</span> Home</div>
+        <div class="sidebar-item"><span class="si">📋</span> Workqueue</div>
+        <div class="sidebar-item"><span class="si">📊</span> Reports</div>
+        <div class="sidebar-item"><span class="si">📈</span> Analytics</div>
+        <div class="sidebar-item"><span class="si">🤖</span> Agents</div>
+      </div>
+      <div class="sidebar-team"><div class="sidebar-team-label">CRM Teamspace</div><span style="color:#7c8db0;">···</span></div>
+      <input class="sidebar-search" placeholder="Search" />
+      <div class="teamspace-item"><div class="ts-icon">L</div><span style="color:#b0b8d0;font-size:12px;">Leadzz</span></div>
+      <div class="sidebar-item active"><span class="si">👥</span> Contacts<span style="margin-left:auto;font-size:11px;color:#7c8db0;">···</span></div>
+      <div class="sidebar-item"><span class="si">🏢</span> Accounts</div>
+      <div class="sidebar-item"><span class="si">💼</span> Deals</div>
+      <div class="sidebar-item"><span class="si">✅</span> Tasks</div>
+      <div class="sidebar-item"><span class="si">📅</span> Meetings</div>
+      <div class="sidebar-item"><span class="si">📞</span> Calls</div>
+      <div class="sidebar-item"><span class="si">📦</span> Products</div>
+      <div class="sidebar-item"><span class="si">📄</span> Quotes</div>
+      <div class="sidebar-item"><span class="si">🛒</span> Sales Orders</div>
+      <div class="sidebar-item"><span class="si">🧾</span> Invoices</div>
+      <div class="sidebar-item"><span class="si">📢</span> Campaigns</div>
+      <div class="sidebar-item"><span class="si">🏪</span> Vendors</div>
+    </div>
+
+    <div class="content">
+      <div class="sub-tabs">
+        <div class="sub-tab active">📌 All Contacts</div>
+        <div class="sub-tab">📌 All Locked Contacts</div>
+        <div class="sub-tab">📌 Co-Owner Contacts</div>
+        <div class="sub-tab">📌 Contacts Shared by Me</div>
+        <div class="sub-tab">···</div>
+      </div>
+      <div class="toolbar">
+        <button class="tool-btn">🔽 Filter</button>
+        <button class="tool-btn">↕ Sort</button>
+        <div class="view-icons">
+          <div class="view-icon active">☰</div>
+          <div class="view-icon">⊟</div>
+          <div class="view-icon">⊞</div>
+          <div class="view-icon">▾</div>
+        </div>
+        <div style="margin-left:auto;display:flex;align-items:center;gap:6px;">
+          <button class="create-btn-main">Create Contact</button>
+          <button class="create-btn-arrow">▾</button>
+          <div class="more-btn">···</div>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <div class="filter-panel">
+          <div class="filter-title">Filter Contacts by</div>
+          <input class="filter-search" placeholder="🔍 Search" />
+          <div class="filter-section-title">▾ System Defined Fil...</div>
+          <div class="filter-item"><div class="filter-cb"></div> Activities</div>
+          <div class="filter-item"><div class="filter-cb"></div> Cadences</div>
+          <div class="filter-item"><div class="filter-cb"></div> Campaigns</div>
+          <div class="filter-item"><div class="filter-cb"></div> Latest Email Status</div>
+          <div class="filter-item"><div class="filter-cb"></div> Locked</div>
+          <div class="filter-item"><div class="filter-cb"></div> Record Action</div>
+          <div class="filter-item"><div class="filter-cb"></div> Scoring Rules</div>
+          <div class="filter-item"><div class="filter-cb"></div> Touched Records</div>
+          <div class="filter-section-title">▾ Filter By Fields</div>
+          <div class="filter-item"><div class="filter-cb"></div> Account Name</div>
+          <div class="filter-item"><div class="filter-cb"></div> Assistant</div>
+          <div class="filter-item"><div class="filter-cb"></div> Asst Phone</div>
+          <div class="filter-item" style="background:#f0f4ff;">
+            <div class="filter-cb" style="border-color:#3b5bdb;"></div>
+            <span style="color:#3b5bdb;font-weight:500;">✍️ Customer Signature</span>
+          </div>
+        </div>
+
+        <div class="table-content">
+          <table>
+            <thead>
+              <tr>
+                <th class="cb-col"><input type="checkbox" class="row-cb" /></th>
+                <th style="width:36px;"></th>
+                <th>Contact Name</th>
+                <th>Account Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th><div class="sig-col-header">✍️ Customer Signature <span class="sig-col-badge">NEW</span></div></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td class="cb-col"><input type="checkbox" class="row-cb" /></td><td><span style="font-size:11px;color:#e03e3e;">May 28</span></td><td>Lawrence</td><td></td><td style="font-size:12px;color:#555;">support@zoho.com</td><td></td><td><div class="sig-thumb unsigned">— —</div></td></tr>
+              <tr><td class="cb-col"><input type="checkbox" class="row-cb" /></td><td></td><td class="contact-name">Ella Peterson</td><td class="account-name">Zoho</td><td></td><td></td>
+                <td><div class="sig-thumb" onmouseenter="showTip(event,'ella')" onmouseleave="hideTip()"><svg class="sig-svg" viewBox="0 0 80 36"><path d="M8,28 C12,18 16,12 22,14 C28,16 24,26 30,22 C36,18 38,10 44,12 C50,14 48,24 54,20 C58,17 60,14 66,16 C70,18 72,22 74,20" stroke="#1a1a2e" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg><div class="sig-overlay">View</div></div></td></tr>
+              <tr><td class="cb-col"><input type="checkbox" class="row-cb" /></td><td></td><td>Benjamin Scott</td><td class="account-name">Zoho</td><td></td><td></td>
+                <td><div class="sig-thumb" onmouseenter="showTip(event,'ben')" onmouseleave="hideTip()"><svg class="sig-svg" viewBox="0 0 80 36"><path d="M6,24 C10,16 14,12 20,16 C26,20 22,28 28,24 C34,20 36,12 42,14 C46,16 44,22 50,20 C56,18 60,14 68,18 C72,20 74,24 76,22" stroke="#1a1a2e" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg><div class="sig-overlay">View</div></div></td></tr>
+              <tr><td class="cb-col"><input type="checkbox" class="row-cb" /></td><td></td><td>Aria Phillips</td><td class="account-name">Zoho</td><td></td><td></td><td><div class="sig-thumb unsigned">— —</div></td></tr>
+              <tr><td class="cb-col"><input type="checkbox" class="row-cb" /></td><td></td><td>Daniel Foster</td><td class="account-name">Zoho</td><td></td><td></td>
+                <td><div class="sig-thumb" onmouseenter="showTip(event,'daniel')" onmouseleave="hideTip()"><svg class="sig-svg" viewBox="0 0 80 36"><path d="M8,20 C16,12 22,10 28,16 C32,20 30,28 36,24 C42,20 44,12 50,14 C56,16 54,26 60,22 C64,19 68,16 74,18" stroke="#1a1a2e" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg><div class="sig-overlay">View</div></div></td></tr>
+              <tr><td class="cb-col"><input type="checkbox" class="row-cb" /></td><td></td><td>Chloe Ramirez</td><td class="account-name">Zoho</td><td></td><td></td><td><div class="sig-thumb unsigned">— —</div></td></tr>
+              <tr><td class="cb-col"><input type="checkbox" class="row-cb" /></td><td></td><td>Samuel Ward</td><td class="account-name">Zoho</td><td></td><td></td>
+                <td><div class="sig-thumb" onmouseenter="showTip(event,'sam')" onmouseleave="hideTip()"><svg class="sig-svg" viewBox="0 0 80 36"><path d="M6,26 C12,14 18,10 24,16 C28,20 26,28 32,22 C38,16 42,10 48,14 C52,17 50,26 56,22 C62,18 66,14 74,16" stroke="#1a1a2e" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg><div class="sig-overlay">View</div></div></td></tr>
+              <tr><td class="cb-col"><input type="checkbox" class="row-cb" /></td><td></td><td>Lily Hughes</td><td class="account-name">Zoho</td><td></td><td></td><td><div class="sig-thumb unsigned">— —</div></td></tr>
+              <tr><td class="cb-col"><input type="checkbox" class="row-cb" /></td><td></td><td>Grace Morgan</td><td class="account-name">Zoho</td><td></td><td></td>
+                <td><div class="sig-thumb" onmouseenter="showTip(event,'grace')" onmouseleave="hideTip()"><svg class="sig-svg" viewBox="0 0 80 36"><path d="M8,22 C14,12 20,10 26,16 C30,20 28,28 36,22 C42,17 46,10 52,14 C56,17 54,26 62,20 C68,15 72,14 76,18" stroke="#1a1a2e" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg><div class="sig-overlay">View</div></div></td></tr>
+              <tr><td class="cb-col"><input type="checkbox" class="row-cb" /></td><td></td><td>Oliver Reed</td><td class="account-name">Zoho</td><td></td><td></td><td><div class="sig-thumb unsigned">— —</div></td></tr>
+            </tbody>
+          </table>
+          <div class="table-footer">
+            <span>Total Records &nbsp;<strong>34</strong></span>
+            <div class="pagination">1 to 34 <div class="page-btn">‹</div><div class="page-btn">›</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-bar">
+    <div class="bb-item"><span class="bi">📌</span>My Pins</div>
+    <div class="bb-item"><span class="bi">💬</span>Chats</div>
+    <div class="bb-item"><span class="bi">📡</span>Channels</div>
+    <div class="bb-item"><span class="bi">🧵</span>Threads</div>
+    <div class="bb-item"><span class="bi">👥</span>People</div>
+  </div>
+</div>
+
+<!-- ==================== SCREEN 2: LAYOUT BUILDER ==================== -->
+<div class="screen" id="screen-builder">
+
+  <!-- Step bar -->
+  <div class="step-bar">
+    <div class="step done" id="step1"><div class="step-dot"></div> Layout Builder</div>
+    <span class="step-arrow">›</span>
+    <div class="step active" id="step2"><div class="step-dot"></div> Drag Signature Field</div>
+    <span class="step-arrow">›</span>
+    <div class="step" id="step3"><div class="step-dot"></div> Field Properties</div>
+  </div>
+
+  <div class="lb-topnav">
+    <span class="lb-btn back" onclick="goToListView()">← Back</span>
+    <span class="breadcrumb">Leadzz &nbsp;|&nbsp; <span>Tourism Accounts le...</span></span>
+    <span class="gear">⚙</span>
+    <div class="actions">
+      <button class="lb-btn lb-btn-cancel" onclick="goToListView()">Cancel</button>
+      <button class="lb-btn lb-btn-saveclose" onclick="saveAndClose()">Save and Close</button>
+      <button class="lb-btn lb-btn-save">Save</button>
+    </div>
+  </div>
+
+  <div class="lb-layout">
+    <div class="lb-left">
+      <div class="lb-panel-title">New Fields ▾</div>
+      <div class="field-grid">
+        <div class="field-item"><span class="icon">—</span>Single Line</div>
+        <div class="field-item"><span class="icon">≡</span>Multi-Line</div>
+        <div class="field-item"><span class="icon">@</span>Email</div>
+        <div class="field-item"><span class="icon">📞</span>Phone</div>
+        <div class="field-item"><span class="icon">☰</span>Pick List</div>
+        <div class="field-item"><span class="icon">☰</span>Multi-Select</div>
+        <div class="field-item"><span class="icon">📅</span>Date</div>
+        <div class="field-item"><span class="icon">🕐</span>Date/Time</div>
+        <div class="field-item"><span class="icon">12</span>Number</div>
+        <div class="field-item"><span class="icon">#</span>Auto-Number</div>
+        <div class="field-item"><span class="icon">$</span>Currency</div>
+        <div class="field-item"><span class="icon">.00</span>Decimal</div>
+        <div class="field-item"><span class="icon">%</span>Percent</div>
+        <div class="field-item"><span class="icon">9.9</span>Long Integer</div>
+        <div class="field-item"><span class="icon">☑</span>Checkbox</div>
+        <div class="field-item"><span class="icon">🔗</span>URL</div>
+        <div class="field-item"><span class="icon">⇄</span>Lookup</div>
+        <div class="field-item"><span class="icon">fx</span>Formula</div>
+        <div class="field-item"><span class="icon">👤</span>User</div>
+        <div class="field-item"><span class="icon">📎</span>File Upload</div>
+        <div class="field-item"><span class="icon">🖼</span>Image Upload</div>
+        <div class="field-item sig-new" id="sigPalette" draggable="true">
+          <span class="new-badge">NEW</span>
+          <span class="icon">✍️</span>Signature
+        </div>
+        <div class="field-item"><span class="icon">↻</span>Rollup Sum...</div>
+        <div class="field-item"><span class="icon">🔘</span>Radio Button</div>
+        <div class="field-item" style="grid-column:span 2;"><span class="icon">📍</span>Address ✦</div>
+      </div>
+      <div class="lb-divider"></div>
+      <div class="field-grid" style="padding:0 8px 4px;">
+        <div class="full-width-item"><span>⇄</span> Multi-Select Lookup</div>
+        <div class="full-width-item"><span>⊞</span> Subform</div>
+        <div class="full-width-item dashed">+ NEW SECTION</div>
+      </div>
+      <div class="lb-divider"></div>
+      <div class="lb-panel-title">Components ▾</div>
+      <div class="comp-item"><span>◫</span> Mirror ✦</div>
+      <div class="comp-item"><span>⬜</span> Button ✦</div>
+      <div class="lb-divider"></div>
+      <div class="unused-bar">Unused Items <span class="badge">62</span></div>
+      <div class="custom-left">Custom Fields Left: 430</div>
+    </div>
+
+    <div class="lb-main">
+      <div class="lb-tab-bar">
+        <div class="lb-tab active">Create</div>
+        <div class="lb-tab">Quick Create</div>
+        <div class="lb-tab">Detail View</div>
+        <button style="margin-left:auto;background:none;border:none;cursor:pointer;font-size:15px;color:#888;">👁</button>
+      </div>
+      <div class="lb-canvas">
+        <div class="form-header">
+          <div class="form-title">Create Lead</div>
+          <div class="form-btns">
+            <button class="fb cancel" onclick="goToListView()">Cancel</button>
+            <button class="fb save" onclick="saveAndClose()">Save</button>
+          </div>
+        </div>
+        <div class="manage-link">⚙ Manage Edit Page Buttons</div>
+        <div class="li-row">Lead Image <div class="toggle"></div></div>
+        <div class="avatar-wrap"><div class="dots-above">···</div><div class="avatar">👤</div></div>
+        <div class="form-section">
+          <div class="sec-hdr">Lead Information <span class="sg">⚙</span></div>
+          <div class="fields-grid" id="formFieldsGrid">
+            <div class="frow"><span class="fi">👤</span> Lead Owner <span class="fd">···</span></div>
+            <div class="frow rb"><span class="fi">🏢</span> Company <span class="fd">···</span></div>
+            <div class="frow"><span class="fi">👤</span> First Name <span class="fd">···</span></div>
+            <div class="frow rb"><span class="fi">👤</span> Last Name <span class="fd">···</span></div>
+            <div class="frow"><span class="fi">📞</span> LANDLINE <span class="fd">···</span></div>
+            <div class="frow"><span class="fi">@</span> Email <span class="fd">···</span></div>
+            <div class="frow"><span class="fi">👤</span> Title <span class="utag">Unique</span><span class="fd">···</span></div>
+            <div class="frow"><span class="fi">📠</span> Fax <span class="fd">···</span></div>
+            <div class="frow"><span class="fi">📞</span> Phone <span class="fd">···</span></div>
+            <div class="frow"><span class="fi">🔗</span> Website <span class="fd">···</span></div>
+            <div class="frow"><span class="fi">📱</span> Mobile <span class="fd">···</span></div>
+            <div class="frow"><span class="fi">☰</span> Lead Status <span class="fd">···</span></div>
+            <div class="frow"><span class="fi">☰</span> Lead Source <span class="fd">···</span></div>
+            <div class="frow"><span class="fi">12</span> No. of Employees <span class="fd">···</span></div>
+            <div class="frow"><span class="fi">☰</span> Industry <span class="fd">···</span></div>
+            <div class="frow"><span class="fi">☰</span> Rating <span class="fd">···</span></div>
+            <div class="frow"><span class="fi">$</span> Annual Revenue <span class="fd">···</span></div>
+            <div class="frow"><span class="fi">👤</span> Created By <span class="fd">···</span></div>
+            <div class="drop-zone" id="dropZone">✍️ Drop Signature Field here</div>
+            <div class="sig-field-row" id="sigInForm" style="display:none;">
+              <span class="sig-icon">✍️</span>
+              <div><div class="sig-label" id="sigInFormLabel">Customer Signature</div><div class="sig-sub">Draw-only · Locks on save</div></div>
+              <span class="fd">···</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal">
+    <div class="modal-title">Signature Field Properties</div>
+    <div class="field-group">
+      <div class="field-label">Field Label <span class="req">*</span></div>
+      <input type="text" class="text-input" id="fieldLabel" value="Customer Signature" />
+    </div>
+    <div class="mdivider"></div>
+    <div class="field-group">
+      <div class="field-label">Consent Title <span class="iicon">i</span></div>
+      <input type="text" class="text-input idle" id="consentTitle" maxlength="100" placeholder="e.g. Treatment Consent Acknowledgement" oninput="updatePreview()" />
+      <div class="char-count"><span id="titleCount">0</span> / 100</div>
+    </div>
+    <div class="field-group">
+      <div class="field-label">Consent Body <span class="iicon">i</span></div>
+      <textarea class="text-area" id="consentBody" maxlength="500" placeholder="e.g. I agree that the treatment requires physical contact..." oninput="updatePreview()"></textarea>
+      <div class="char-count"><span id="bodyCount">0</span> / 500</div>
+    </div>
+    <div class="consent-preview">
+      <div class="preview-label">Preview — what customer sees</div>
+      <div class="preview-title" id="previewTitle" style="color:#aaa;font-style:italic;font-weight:400;font-size:12px;">Consent title will appear here</div>
+      <div class="preview-body" id="previewBody" style="color:#bbb;font-style:italic;">Consent body text will appear here...</div>
+    </div>
+    <div class="mdivider"></div>
+    <div class="cb-row" onclick="toggleCb(this)"><div class="cb-box"></div><span class="cb-label">Required</span></div>
+    <div class="cb-row" onclick="toggleCb(this)"><div class="cb-box"></div><span class="cb-label">Contains Personal Data <span class="iicon">i</span></span></div>
+    <div class="cb-row" onclick="toggleCb(this)"><div class="cb-box"></div><span class="cb-label">Show Tooltip</span></div>
+    <div class="modal-footer">
+      <button class="mbtn mbtn-cancel" onclick="cancelModal()">Cancel</button>
+      <button class="mbtn mbtn-done" onclick="doneModal()">Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- Signature tooltip -->
+<div class="sig-tooltip" id="sigTooltip">
+  <div class="sig-tooltip-img" id="tipImg"></div>
+  <div class="sig-tooltip-meta" id="tipMeta"></div>
+</div>
+
+<!-- Drag ghost -->
+<div class="drag-ghost" id="dragGhost">✍️ Signature</div>
+
+<!-- Hint -->
+<div class="hint" id="hint">Drag me to the form →</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+  // ── SCREEN NAVIGATION ──
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+  function goToLayoutBuilder() {
+    showScreen('screen-builder');
+    showToast('Layout Builder opened — drag the Signature field onto the form');
+  }
+  function goToListView() {
+    showScreen('screen-list');
+  }
+  function saveAndClose() {
+    showScreen('screen-list');
+    showToast('✅ Layout saved — Signature field is now available in Contacts');
+  }
+
+  // ── TOAST ──
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.remove('visible');
+    void t.offsetWidth;
+    t.classList.add('visible');
+    setTimeout(() => t.classList.remove('visible'), 2600);
+  }
+
+  // ── DRAG AND DROP ──
+  const sigPalette = document.getElementById('sigPalette');
+  const dropZone = document.getElementById('dropZone');
+  const sigInForm = document.getElementById('sigInForm');
+  const hint = document.getElementById('hint');
+  const ghost = document.getElementById('dragGhost');
+
+  sigPalette.addEventListener('mouseenter', (e) => { hint.style.display = 'block'; hint.style.left = (e.clientX+14)+'px'; hint.style.top = (e.clientY-10)+'px'; });
+  sigPalette.addEventListener('mousemove', (e) => { hint.style.left = (e.clientX+14)+'px'; hint.style.top = (e.clientY-10)+'px'; });
+  sigPalette.addEventListener('mouseleave', () => { hint.style.display = 'none'; });
+
+  sigPalette.addEventListener('dragstart', (e) => {
+    hint.style.display = 'none';
+    sigPalette.classList.add('dragging');
+    dropZone.classList.add('visible');
+    ghost.style.display = 'flex';
+    ghost.style.left = '-200px'; ghost.style.top = '-200px';
+    e.dataTransfer.setDragImage(ghost, 0, 0);
+    document.getElementById('step2').classList.remove('active');
+    document.getElementById('step2').classList.add('done');
+    document.getElementById('step3').classList.add('active');
+  });
+
+  sigPalette.addEventListener('dragend', () => {
+    sigPalette.classList.remove('dragging');
+    ghost.style.display = 'none';
+    if (sigInForm.style.display === 'none') {
+      dropZone.classList.remove('visible');
+      document.getElementById('step2').classList.add('active');
+      document.getElementById('step2').classList.remove('done');
+      document.getElementById('step3').classList.remove('active');
+    }
+  });
+
+  dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('over'); });
+  dropZone.addEventListener('dragleave', () => { dropZone.classList.remove('over'); });
+  dropZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropZone.classList.remove('over');
+    dropZone.classList.remove('visible');
+    dropZone.style.display = 'none';
+    sigInForm.style.display = 'flex';
+    setTimeout(() => { document.getElementById('modalBackdrop').classList.add('visible'); }, 200);
+  });
+
+  // ── MODAL ──
+  function updatePreview() {
+    const t = document.getElementById('consentTitle').value;
+    const b = document.getElementById('consentBody').value;
+    const pt = document.getElementById('previewTitle');
+    const pb = document.getElementById('previewBody');
+    if (t) { pt.textContent = t; pt.style.color='#1a1a2e'; pt.style.fontStyle='normal'; pt.style.fontWeight='600'; pt.style.fontSize='12px'; }
+    else { pt.textContent = 'Consent title will appear here'; pt.style.color='#aaa'; pt.style.fontStyle='italic'; pt.style.fontWeight='400'; }
+    if (b) { pb.textContent = b; pb.style.color='#555'; pb.style.fontStyle='normal'; }
+    else { pb.textContent = 'Consent body text will appear here...'; pb.style.color='#bbb'; pb.style.fontStyle='italic'; }
+    document.getElementById('titleCount').textContent = t.length;
+    document.getElementById('bodyCount').textContent = b.length;
+  }
+  function toggleCb(row) { row.querySelector('.cb-box').classList.toggle('checked'); }
+  function cancelModal() {
+    document.getElementById('modalBackdrop').classList.remove('visible');
+    sigInForm.style.display = 'none';
+    dropZone.style.display = '';
+    document.getElementById('step2').classList.add('active');
+    document.getElementById('step2').classList.remove('done');
+    document.getElementById('step3').classList.remove('active');
+  }
+  function doneModal() {
+    document.getElementById('modalBackdrop').classList.remove('visible');
+    const label = document.getElementById('fieldLabel').value || 'Customer Signature';
+    document.getElementById('sigInFormLabel').textContent = label;
+    document.getElementById('step3').classList.remove('active');
+    document.getElementById('step3').classList.add('done');
+    showToast('✅ Properties saved — click Save and Close to return to list');
+  }
+
+  // ── SIGNATURE TOOLTIP ──
+  const tipData = {
+    ella: { svg: `<svg width="170" height="60" viewBox="0 0 80 36"><path d="M8,28 C12,18 16,12 22,14 C28,16 24,26 30,22 C36,18 38,10 44,12 C50,14 48,24 54,20 C58,17 60,14 66,16 C70,18 72,22 74,20" stroke="#1a1a2e" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>`, meta: `<strong>Signed by:</strong> Ella Peterson<br><strong>Date:</strong> 02 Sep 2026, 10:14 AM<br><strong>IP:</strong> 103.21.58.xxx` },
+    ben: { svg: `<svg width="170" height="60" viewBox="0 0 80 36"><path d="M6,24 C10,16 14,12 20,16 C26,20 22,28 28,24 C34,20 36,12 42,14 C46,16 44,22 50,20 C56,18 60,14 68,18" stroke="#1a1a2e" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>`, meta: `<strong>Signed by:</strong> Benjamin Scott<br><strong>Date:</strong> 01 Sep 2026, 3:42 PM<br><strong>IP:</strong> 103.21.44.xxx` },
+    daniel: { svg: `<svg width="170" height="60" viewBox="0 0 80 36"><path d="M8,20 C16,12 22,10 28,16 C32,20 30,28 36,24 C42,20 44,12 50,14 C56,16 54,26 60,22 C64,19 68,16 74,18" stroke="#1a1a2e" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>`, meta: `<strong>Signed by:</strong> Daniel Foster<br><strong>Date:</strong> 31 Aug 2026, 11:20 AM<br><strong>IP:</strong> 103.21.61.xxx` },
+    sam: { svg: `<svg width="170" height="60" viewBox="0 0 80 36"><path d="M6,26 C12,14 18,10 24,16 C28,20 26,28 32,22 C38,16 42,10 48,14 C52,17 50,26 56,22" stroke="#1a1a2e" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>`, meta: `<strong>Signed by:</strong> Samuel Ward<br><strong>Date:</strong> 30 Aug 2026, 2:05 PM<br><strong>IP:</strong> 103.21.77.xxx` },
+    grace: { svg: `<svg width="170" height="60" viewBox="0 0 80 36"><path d="M8,22 C14,12 20,10 26,16 C30,20 28,28 36,22 C42,17 46,10 52,14 C56,17 54,26 62,20" stroke="#1a1a2e" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>`, meta: `<strong>Signed by:</strong> Grace Morgan<br><strong>Date:</strong> 29 Aug 2026, 9:30 AM<br><strong>IP:</strong> 103.21.55.xxx` }
+  };
+  function showTip(e, key) {
+    const t = document.getElementById('sigTooltip');
+    document.getElementById('tipImg').innerHTML = tipData[key].svg;
+    document.getElementById('tipMeta').innerHTML = tipData[key].meta;
+    t.classList.add('visible');
+    t.style.left = (e.clientX+12)+'px'; t.style.top = (e.clientY-10)+'px';
+  }
+  function hideTip() { document.getElementById('sigTooltip').classList.remove('visible'); }
+</script>
+</body>
+</html>
