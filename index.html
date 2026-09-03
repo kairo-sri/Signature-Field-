@@ -149,10 +149,10 @@
   .frow .fd { margin-left: auto; color: #ccc; font-size: 13px; }
   .frow .utag { font-size: 10px; color: #999; background: #f0f0f0; padding: 1px 5px; border-radius: 3px; }
   .frow.rb { border-left: 3px solid #e03e3e; }
-  .drop-zone { grid-column: span 2; border: 2px dashed #3b5bdb; border-radius: 4px; padding: 16px; display: none; align-items: center; justify-content: center; color: #3b5bdb; font-size: 12px; font-weight: 500; background: #f0f4ff; gap: 8px; }
+  .drop-zone { border: 2px dashed #3b5bdb; border-radius: 4px; padding: 16px; display: none; align-items: center; justify-content: center; color: #3b5bdb; font-size: 12px; font-weight: 500; background: #f0f4ff; gap: 8px; }
   .drop-zone.visible { display: flex; }
   .drop-zone.over { background: #dde5ff; }
-  .sig-field-row { grid-column: span 2; display: flex; align-items: center; padding: 12px 16px; border-bottom: 1px solid #f5f5f5; gap: 10px; background: #f0f4ff; border-left: 3px solid #3b5bdb; }
+  .sig-field-row { display: flex; align-items: center; padding: 12px 16px; border-bottom: 1px solid #f5f5f5; border-right: 1px solid #f5f5f5; gap: 10px; background: #f0f4ff; border-left: 3px solid #3b5bdb; }
   .sig-field-row .sig-icon { font-size: 16px; }
   .sig-field-row .sig-label { font-size: 12px; font-weight: 600; color: #3b5bdb; }
   .sig-field-row .sig-sub { font-size: 11px; color: #888; margin-top: 1px; }
@@ -233,7 +233,7 @@
   .cf-sig-click-sub { font-size: 11px; color: #888; margin-top: 2px; }
 
   /* SIGNATURE CANVAS MODAL */
-  .sig-canvas-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.55); display: none; align-items: center; justify-content: center; z-index: 2000; }
+  .sig-canvas-overlay { position: fixed; inset: 0; background: rgba(180,185,210,0.55); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); display: none; align-items: center; justify-content: center; z-index: 2000; }
   .sig-canvas-overlay.visible { display: flex; }
   .sig-canvas-box { background: white; border-radius: 12px; width: 540px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
   .sig-canvas-hdr { padding: 16px 20px 14px; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; justify-content: space-between; }
@@ -652,7 +652,7 @@
           <div class="cf-field" style="background:#fafafa;"></div>
 
           <!-- SIGNATURE FIELD -->
-          <div class="cf-field-full">
+          <div class="cf-field" style="border-right:none;align-items:flex-start;padding-top:14px;">
             <div class="cf-label" style="padding-top:10px;" id="sigFieldLabelCreate">Customer Signature</div>
             <div style="flex:1;">
               <div class="cf-sig-click" id="cfSigClick" onclick="openSignatureCanvas()">
@@ -759,7 +759,7 @@
             </div>
 
             <!-- LOCKED SIGNATURE FIELD -->
-            <div class="dv-field-full">
+            <div class="dv-field" style="border-right:none;">
               <div class="dv-fl" style="padding-top:4px;" id="dvSigLabel">Customer Signature</div>
               <div>
                 <div class="dv-sig-field-wrap">
