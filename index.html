@@ -232,10 +232,23 @@
   .cf-sig-click-text { font-size: 13px; color: #3b5bdb; font-weight: 500; }
   .cf-sig-click-sub { font-size: 11px; color: #888; margin-top: 2px; }
 
-  /* FIELD PICKER in Field Properties Modal */
-  .fp-list { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; margin-top: 6px; }
-  .fp-item { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 4px; cursor: pointer; font-size: 13px; color: #1a1a2e; }
-  .fp-item:hover { background: #f0f4ff; }
+  /* FIELD PICKER — multi-select dropdown with chips */
+  .ms-wrap { position: relative; }
+  .ms-input { min-height: 38px; border: 1.5px solid #d0d0d0; border-radius: 6px; padding: 5px 8px; display: flex; flex-wrap: wrap; gap: 5px; align-items: center; cursor: pointer; background: white; }
+  .ms-input:hover { border-color: #b0b0b0; }
+  .ms-input.open { border-color: #3b5bdb; box-shadow: 0 0 0 3px rgba(59,91,219,0.1); }
+  .ms-placeholder { font-size: 13px; color: #aaa; user-select: none; padding: 2px 2px; }
+  .ms-chip { background: #eef2ff; color: #3b5bdb; border: 1px solid #c5d0ff; border-radius: 4px; padding: 2px 6px 2px 8px; font-size: 12px; font-weight: 500; display: flex; align-items: center; gap: 4px; white-space: nowrap; }
+  .ms-chip-x { cursor: pointer; color: #7c8fdb; font-size: 13px; line-height: 1; }
+  .ms-chip-x:hover { color: #e03e3e; }
+  .ms-arrow { margin-left: auto; color: #aaa; font-size: 11px; flex-shrink: 0; padding-left: 4px; }
+  .ms-dropdown { position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: white; border: 1.5px solid #d0d0d0; border-radius: 6px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); z-index: 500; display: none; overflow: hidden; }
+  .ms-dropdown.open { display: block; }
+  .ms-dd-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; font-size: 13px; color: #1a1a2e; cursor: pointer; }
+  .ms-dd-item:hover { background: #f5f7ff; }
+  .ms-dd-item.selected { background: #f0f4ff; }
+  .ms-dd-cb { width: 16px; height: 16px; border: 1.5px solid #ccc; border-radius: 3px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+  .ms-dd-cb.checked { background: #3b5bdb; border-color: #3b5bdb; color: white; font-size: 10px; font-weight: 700; }
 
   /* FIELD PREVIEW in Signing Canvas Popup */
   .sig-fields-preview { padding: 14px 20px; border-bottom: 1px solid #e0e5ff; background: #fff; }
@@ -807,6 +820,27 @@
     </div>
     <div class="mdivider"></div>
     <div class="field-group">
+      <div class="field-label">Show fields in signing preview <span class="iicon">i</span></div>
+      <div style="font-size:11px;color:#888;margin-bottom:8px;">Selected fields appear to the customer above the consent text when signing.</div>
+      <div class="ms-wrap" id="msWrap">
+        <div class="ms-input" id="msInput" onclick="toggleMsDropdown(event)">
+          <span class="ms-placeholder" id="msPlaceholder">Select fields...</span>
+          <span class="ms-arrow" id="msArrow">▾</span>
+        </div>
+        <div class="ms-dropdown" id="msDropdown">
+          <div class="ms-dd-item" onclick="toggleMsField(event,'First Name')"><div class="ms-dd-cb" id="mscb-First Name"></div><span>First Name</span></div>
+          <div class="ms-dd-item" onclick="toggleMsField(event,'Last Name')"><div class="ms-dd-cb" id="mscb-Last Name"></div><span>Last Name</span></div>
+          <div class="ms-dd-item" onclick="toggleMsField(event,'Date of Birth')"><div class="ms-dd-cb" id="mscb-Date of Birth"></div><span>Date of Birth</span></div>
+          <div class="ms-dd-item" onclick="toggleMsField(event,'Account Name')"><div class="ms-dd-cb" id="mscb-Account Name"></div><span>Account Name</span></div>
+          <div class="ms-dd-item" onclick="toggleMsField(event,'Email')"><div class="ms-dd-cb" id="mscb-Email"></div><span>Email</span></div>
+          <div class="ms-dd-item" onclick="toggleMsField(event,'Contact Status')"><div class="ms-dd-cb" id="mscb-Contact Status"></div><span>Contact Status</span></div>
+          <div class="ms-dd-item" onclick="toggleMsField(event,'Lead Source')"><div class="ms-dd-cb" id="mscb-Lead Source"></div><span>Lead Source</span></div>
+          <div class="ms-dd-item" onclick="toggleMsField(event,'Contact Owner')"><div class="ms-dd-cb" id="mscb-Contact Owner"></div><span>Contact Owner</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="mdivider"></div>
+    <div class="field-group">
       <div class="field-label">Consent Title <span class="iicon">i</span></div>
       <input type="text" class="text-input idle" id="consentTitle" maxlength="100" placeholder="e.g. Treatment Consent Acknowledgement" oninput="updatePreview()" />
       <div class="char-count"><span id="titleCount">0</span> / 100</div>
@@ -820,21 +854,6 @@
       <div class="preview-label">Preview — what customer sees</div>
       <div class="preview-title" id="previewTitle" style="color:#aaa;font-style:italic;font-weight:400;font-size:12px;">Consent title will appear here</div>
       <div class="preview-body" id="previewBody" style="color:#bbb;font-style:italic;">Consent body text will appear here...</div>
-    </div>
-    <div class="mdivider"></div>
-    <div class="field-group">
-      <div class="field-label">Show fields in signing preview <span class="iicon">i</span></div>
-      <div style="font-size:11px;color:#888;margin-bottom:8px;">Selected fields will be shown to the customer above the consent text when signing.</div>
-      <div class="fp-list">
-        <div class="fp-item" onclick="togglePreviewField(this,'First Name')"><div class="cb-box"></div><span>First Name</span></div>
-        <div class="fp-item" onclick="togglePreviewField(this,'Last Name')"><div class="cb-box"></div><span>Last Name</span></div>
-        <div class="fp-item" onclick="togglePreviewField(this,'Date of Birth')"><div class="cb-box"></div><span>Date of Birth</span></div>
-        <div class="fp-item" onclick="togglePreviewField(this,'Account Name')"><div class="cb-box"></div><span>Account Name</span></div>
-        <div class="fp-item" onclick="togglePreviewField(this,'Email')"><div class="cb-box"></div><span>Email</span></div>
-        <div class="fp-item" onclick="togglePreviewField(this,'Contact Status')"><div class="cb-box"></div><span>Contact Status</span></div>
-        <div class="fp-item" onclick="togglePreviewField(this,'Lead Source')"><div class="cb-box"></div><span>Lead Source</span></div>
-        <div class="fp-item" onclick="togglePreviewField(this,'Contact Owner')"><div class="cb-box"></div><span>Contact Owner</span></div>
-      </div>
     </div>
     <div class="mdivider"></div>
     <div class="cb-row" onclick="toggleCb(this)"><div class="cb-box"></div><span class="cb-label">Required</span></div>
@@ -912,14 +931,73 @@
     'Contact Owner':  function(){ return 'Sridhar'; }
   };
 
-  function togglePreviewField(row, fieldName) {
-    var box = row.querySelector('.cb-box');
-    box.classList.toggle('checked');
-    if (box.classList.contains('checked')) {
-      savedPreviewFields.push(fieldName);
-    } else {
+  /* ── MULTI-SELECT DROPDOWN ── */
+  function toggleMsDropdown(e) {
+    e.stopPropagation();
+    var dd = document.getElementById('msDropdown');
+    var inp = document.getElementById('msInput');
+    var open = dd.classList.contains('open');
+    dd.classList.toggle('open');
+    inp.classList.toggle('open');
+    document.getElementById('msArrow').textContent = open ? '▾' : '▴';
+  }
+
+  function toggleMsField(e, fieldName) {
+    e.stopPropagation();
+    var cb = document.getElementById('mscb-' + fieldName);
+    var item = cb.parentElement;
+    var already = savedPreviewFields.indexOf(fieldName) !== -1;
+    if (already) {
       savedPreviewFields = savedPreviewFields.filter(function(f){ return f !== fieldName; });
+      cb.classList.remove('checked'); cb.textContent = '';
+      item.classList.remove('selected');
+    } else {
+      savedPreviewFields.push(fieldName);
+      cb.classList.add('checked'); cb.textContent = '✓';
+      item.classList.add('selected');
     }
+    renderMsChips();
+  }
+
+  function removeMsChip(e, fieldName) {
+    e.stopPropagation();
+    savedPreviewFields = savedPreviewFields.filter(function(f){ return f !== fieldName; });
+    var cb = document.getElementById('mscb-' + fieldName);
+    if (cb) { cb.classList.remove('checked'); cb.textContent = ''; cb.parentElement.classList.remove('selected'); }
+    renderMsChips();
+  }
+
+  function renderMsChips() {
+    var inp = document.getElementById('msInput');
+    var placeholder = document.getElementById('msPlaceholder');
+    var arrow = document.getElementById('msArrow');
+    // Remove existing chips
+    inp.querySelectorAll('.ms-chip').forEach(function(c){ c.remove(); });
+    if (savedPreviewFields.length === 0) {
+      placeholder.style.display = '';
+    } else {
+      placeholder.style.display = 'none';
+      savedPreviewFields.forEach(function(fieldName) {
+        var chip = document.createElement('div');
+        chip.className = 'ms-chip';
+        chip.innerHTML = fieldName + '<span class="ms-chip-x" onclick="removeMsChip(event,'' + fieldName + '')">✕</span>';
+        inp.insertBefore(chip, arrow);
+      });
+    }
+  }
+
+  // Close dropdown on outside click
+  document.addEventListener('click', function(e) {
+    var wrap = document.getElementById('msWrap');
+    if (wrap && !wrap.contains(e.target)) {
+      document.getElementById('msDropdown').classList.remove('open');
+      document.getElementById('msInput').classList.remove('open');
+      document.getElementById('msArrow').textContent = '▾';
+    }
+  });
+
+  function togglePreviewField(row, fieldName) {
+    // legacy — no-op, replaced by toggleMsField
   }
 
   /* ── SCREEN NAV ── */
